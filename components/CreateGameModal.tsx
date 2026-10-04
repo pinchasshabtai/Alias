@@ -21,7 +21,10 @@ export function CreateGameModal({ open, onClose, initial }: Props) {
   const [pending, startTransition] = useTransition();
   const [name, setName] = useState(initial?.name ?? 'המשחק שלנו');
   const [isPrivate, setIsPrivate] = useState(true);
-  const [settings, setSettings] = useState<SettingsValues>({ ...DEFAULT_SETTINGS, ...initial });
+  const [settings, setSettings] = useState<SettingsValues>(() => {
+    const { name: _ignored, ...rest } = initial ?? {};
+    return { ...DEFAULT_SETTINGS, ...rest };
+  });
 
   const submit = (e: FormEvent) => {
     e.preventDefault();

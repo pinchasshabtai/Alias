@@ -10,7 +10,7 @@ interface FieldsProps {
   disabled?: boolean;
 }
 
-function Chips<T extends number>({
+function Chips({
   options,
   value,
   onPick,
@@ -18,10 +18,10 @@ function Chips<T extends number>({
   disabled,
   label,
 }: {
-  options: readonly T[];
-  value: T;
-  onPick: (v: T) => void;
-  render: (v: T) => string;
+  options: readonly number[];
+  value: number;
+  onPick: (v: number) => void;
+  render: (v: number) => string;
   disabled?: boolean;
   label: string;
 }) {
