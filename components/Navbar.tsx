@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useEffect, useState, type MouseEvent } from 'react';
 import { Avatar } from '@/components/Avatar';
 import { SoundToggle } from '@/components/SoundToggle';
 import { logoutAction } from '@/app/(auth)/actions';
@@ -23,8 +24,20 @@ const LINKS = [
 
 export function Navbar({ username, avatar, isAdmin }: Props) {
   const pathname = usePathname();
+  const [pendingHref, setPendingHref] = useState<string | null>(null);
   const links = isAdmin ? [...LINKS, { href: '/admin', label: 'ניהול', icon: '🛠️' }] : LINKS;
   const active = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
+
+  useEffect(() => {
+    setPendingHref(null);
+  }, [pathname]);
+
+  const handleNavigation = (href: string, event: MouseEvent<HTMLAnchorElement>) => {
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || pathname === href) return;
+    setPendingHref(href);
+  };
+
+  const isActive = (href: string) => pendingHref ? pendingHref === href : active(href);
 
   return (
     <>
@@ -39,7 +52,9 @@ export function Navbar({ username, avatar, isAdmin }: Props) {
               <Link
                 key={l.href}
                 href={l.href}
-                className={cn('rounded-xl px-3 py-2 text-sm font-bold transition hover:bg-white', active(l.href) && 'bg-white shadow-card')}
+                onClick={(event) => handleNavigation(l.href, event)}
+                aria-current={isActive(l.href) ? 'page' : undefined}
+                className={cn('rounded-xl px-3 py-2 text-sm font-bold transition hover:bg-white', isActive(l.href) && 'bg-white shadow-card')}
               >
                 {l.label}
               </Link>
@@ -69,9 +84,13 @@ export function Navbar({ username, avatar, isAdmin }: Props) {
           <Link
             key={l.href}
             href={l.href}
-            className={cn('flex flex-col items-center gap-0.5 py-2 text-[11px] font-bold', active(l.href) ? 'text-tomato' : 'text-ink/60')}
+            onClick={(event) => handleNavigation(l.href, event)}
+            aria-current={isActive(l.href) ? 'page' : undefined}
+            className={cn('flex flex-col items-center gap-0.5 py-2 text-[11px] font-bold', isActive(l.href) ? 'text-tomato' : 'text-ink/60')}
           >
-            <span className="text-xl">{l.icon}</span>
+            <span className="flex h-7 items-center justify-center text-xl">
+              {pendingHref === l.href ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" aria-label="טוען" /> : l.icon}
+            </span>
             {l.label}
           </Link>
         ))}
